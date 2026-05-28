@@ -101,6 +101,48 @@ func runRun() {
 	fmt.Println("Output:\n", string(output))
 }
 
+func setBuild(command string) {
+	readFile, _ := os.Open("./.anywhere/settings.json")
+	defer readFile.Close()
+	
+	decoder := json.NewDecoder(readFile)
+	
+	// Technically bad practice and a struct should be used here.
+	var defaultData settings
+	
+	// NEED to pass by reference! If not, how will it set the data dummy?
+	decoder.Decode(&defaultData)
+	
+	defaultData.Build = command
+	fmt.Printf("Unmarshaled Struct: %+v\n", defaultData)
+	
+	writeFile, _ := os.OpenFile("./.anywhere/settings.json", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	encoder := json.NewEncoder(writeFile)
+	
+	encoder.Encode(defaultData);
+}
+
+func setRun(command string) {
+	readFile, _ := os.Open("./.anywhere/settings.json")
+	defer readFile.Close()
+	
+	decoder := json.NewDecoder(readFile)
+	
+	// Technically bad practice and a struct should be used here.
+	var defaultData settings
+	
+	// NEED to pass by reference! If not, how will it set the data dummy?
+	decoder.Decode(&defaultData)
+	
+	defaultData.Run = command
+	fmt.Printf("Unmarshaled Struct: %+v\n", defaultData)
+	
+	writeFile, _ := os.OpenFile("./.anywhere/settings.json", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	encoder := json.NewEncoder(writeFile)
+	
+	encoder.Encode(defaultData);
+}
+
 func main() {
 
 	startUp()
@@ -126,5 +168,10 @@ func main() {
 		runBuild()
 	} else if (*run == "true") {
 		runRun()
+	} else if (*build != "true" && *run == "nil") {
+		setBuild(*build)
+	} else if (*run != "true" && *build =="nil") {
+		setRun(*run)
 	}
+	
 }
