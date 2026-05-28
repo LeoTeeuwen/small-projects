@@ -103,6 +103,5 @@ func main() {
 		runBuild(*build)
 	} else if (*run == "true") {
 		runRun(*run)
-	} else if ()
-
+	}
 }
