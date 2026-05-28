@@ -48,7 +48,7 @@ func startUp() {
 	}
 }
 
-func runBuild(command string) {
+func runBuild() {
 	file, _ := os.Open("./.anywhere/settings.json")
 	defer file.Close()
 
@@ -75,8 +75,30 @@ func runBuild(command string) {
 	
 }
 
-func runRun(command string) {
+func runRun() {
+	file, _ := os.Open("./.anywhere/settings.json")
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+
+	// Technically bad practice and a struct should be used here.
+	var defaultData settings
+
+	// NEED to pass by reference! If not, how will it set the data dummy?
+	decoder.Decode(&defaultData)
+
+	trimmedString := strings.Replace(defaultData.Run, "--", "", -1)
+	fmt.Printf("Command being executed: %s\n", trimmedString)
 	
+	cmd := exec.Command("cmd", "/C", trimmedString)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	fmt.Println("Output:\n", string(output))
 }
 
 func main() {
@@ -99,9 +121,10 @@ func main() {
 		fmt.Println("One at a time.")	
 	}
 
+	// TODO replace this with a generic run function and the argument is the key of the command that needs to be ran
 	if (*build == "true") {
-		runBuild(*build)
+		runBuild()
 	} else if (*run == "true") {
-		runRun(*run)
+		runRun()
 	}
 }
