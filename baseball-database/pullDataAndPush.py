@@ -4,8 +4,6 @@ import mysql.connector
 import requests
 import json
 
-mlb = mlbstatsapi.Mlb()
-
 mydb = mysql.connector.connect(
   host="127.0.0.1",
   user="root",
