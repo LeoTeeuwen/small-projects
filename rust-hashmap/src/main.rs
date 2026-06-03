@@ -1,3 +1,5 @@
+use std::process::exit;
+
 pub struct HashMap<const u: usize> {
     // Size is array index of key array
     pub size: usize,
@@ -23,18 +25,20 @@ impl<const u: usize> HashMap<u> {
             hash = ((hash << 5) + hash) + c; 
         }
 
+        let val = hash % u;
         return hash % u;
     }
 
+    // Make sure to normalize output to size of array! (u)
     fn hash2(&self, key: String) -> usize {
+        let PRIME = 10903;
         let mut hash: usize = 10903;
 
         for i in key.chars() {
             let c = i as usize;
             hash = ((hash << 5) + hash) + c; 
         }
-
-        return (hash * u) % hash;
+        return PRIME - (hash%PRIME);
     }
 
     pub fn insert(&mut self, key: &String, value: &String) {
@@ -66,7 +70,7 @@ impl<const u: usize> HashMap<u> {
             }
         }
 
-        return "Array is full!".to_string();
+        return "Not in array!".to_string();
     }
 
     pub fn print(&self) {
@@ -80,9 +84,16 @@ impl<const u: usize> HashMap<u> {
 }
 
 fn main() {
-    println!("Hello, world!");
     let mut hash:HashMap<5000> = HashMap::new();
-    hash.insert(&"Hello".to_string(), &"World".to_string());
-    let found = hash.search("Hello".to_string());    
-    println!("{found}")
+    
+    hash.insert(&"HfKlo".to_string(), &"World1!".to_string());
+    let mut found = hash.search("HfKlo".to_string());    
+    println!("{found}");
+    
+    hash.insert(&"HemKo".to_string(), &"World2!".to_string());
+    found = hash.search("HemKo".to_string());    
+    println!("{found}");
+    
+    found = hash.search("Hello".to_string());    
+    println!("{found}");
 }
