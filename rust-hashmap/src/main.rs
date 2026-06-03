@@ -1,15 +1,17 @@
 pub struct HashMap<const u: usize> {
     // Size is array index of key array
     pub size: usize,
+    // For clean printing
     pub keys: [String; u],
-    pub data: [String; u]
+    // Both key and data pair stored in data array, (key, data) is the protocol
+    pub data: [(String, String); u]
 }
 
 
 impl<const u: usize> HashMap<u> {
     // Constructor convention
     pub fn new() -> HashMap<u> {
-        HashMap { size: 0, keys: [const {String::new()}; u], data: [const {String::new()}; u] }
+        HashMap { size: 0, keys: [const {String::new()}; u], data: [const {((String::new(), String::new()))}; u] }
     }
 
     fn hash(&self, key: String) -> usize {
@@ -41,18 +43,30 @@ impl<const u: usize> HashMap<u> {
         let mut arrayKey: usize = self.hash(key.to_string());
         let arrayKey2: usize = self.hash2(key.to_string());
 
-        while(self.data[arrayKey] != "") {
+        while(self.data[arrayKey].1 != "") {
             arrayKey = (arrayKey + arrayKey2) % u;
         }
 
-        self.data[arrayKey] = value.to_string();
+        self.data[arrayKey].0 = key.to_string();
+        self.data[arrayKey].1 = value.to_string();
         self.size += 1;
     }
     
-    // TODO fix for data pair
     pub fn search(&self, key: String) -> String {
-        let arrayKey = self.hash(key.to_string());
-        return self.data[arrayKey].clone();
+        let mut arrayKey: usize = self.hash(key.to_string());
+        let arrayKey2: usize = self.hash2(key.to_string());
+
+        loop {
+            if (self.data[arrayKey].1 == "") {
+                break;
+            } else if (self.data[arrayKey].0 == key.to_string())  {
+                return (self.data[arrayKey].1).to_string();
+            } else if (self.data[arrayKey].0 != key.to_string()) {
+                arrayKey = (arrayKey + arrayKey2) % u;
+            }
+        }
+
+        return "Array is full!".to_string();
     }
 
     pub fn print(&self) {
@@ -67,7 +81,7 @@ impl<const u: usize> HashMap<u> {
 
 fn main() {
     println!("Hello, world!");
-    let mut hash:HashMap<10000> = HashMap::new();
+    let mut hash:HashMap<5000> = HashMap::new();
     hash.insert(&"Hello".to_string(), &"World".to_string());
     let found = hash.search("Hello".to_string());    
     println!("{found}")
