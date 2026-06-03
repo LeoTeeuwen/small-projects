@@ -24,11 +24,29 @@ impl<const u: usize> HashMap<u> {
         return hash % u;
     }
 
-    // TODO fix for data pair
+    fn hash2(&self, key: String) -> usize {
+        let mut hash: usize = 10903;
+
+        for i in key.chars() {
+            let c = i as usize;
+            hash = ((hash << 5) + hash) + c; 
+        }
+
+        return (hash * u) % hash;
+    }
+
     pub fn insert(&mut self, key: &String, value: &String) {
         self.keys[self.size] = key.to_string();
-        let arrayKey = self.hash(key.to_string());
+
+        let mut arrayKey: usize = self.hash(key.to_string());
+        let arrayKey2: usize = self.hash2(key.to_string());
+
+        while(self.data[arrayKey] != "") {
+            arrayKey = (arrayKey + arrayKey2) % u;
+        }
+
         self.data[arrayKey] = value.to_string();
+        self.size += 1;
     }
     
     // TODO fix for data pair
@@ -52,4 +70,5 @@ fn main() {
     let mut hash:HashMap<10000> = HashMap::new();
     hash.insert(&"Hello".to_string(), &"World".to_string());
     let found = hash.search("Hello".to_string());    
+    println!("{found}")
 }
