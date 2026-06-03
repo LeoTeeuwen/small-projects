@@ -41,7 +41,7 @@ impl<const u: usize> HashMap<u> {
         return PRIME - (hash%PRIME);
     }
 
-    pub fn insert(&mut self, key: &String, value: &String) {
+    pub fn insert(&mut self, key: String, value: String) {
         self.keys[self.size] = key.to_string();
 
         let mut arrayKey: usize = self.hash(key.to_string());
@@ -86,11 +86,11 @@ impl<const u: usize> HashMap<u> {
 fn main() {
     let mut hash:HashMap<5000> = HashMap::new();
     
-    hash.insert(&"HfKlo".to_string(), &"World1!".to_string());
+    hash.insert("HfKlo".to_string(), "World1!".to_string());
     let mut found = hash.search("HfKlo".to_string());    
     println!("{found}");
     
-    hash.insert(&"HemKo".to_string(), &"World2!".to_string());
+    hash.insert("HemKo".to_string(), "World2!".to_string());
     found = hash.search("HemKo".to_string());    
     println!("{found}");
     
