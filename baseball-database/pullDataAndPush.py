@@ -2,6 +2,8 @@
 
 import mysql.connector
 import requests
+import json
+import sys
 
 mydb = mysql.connector.connect(
   host="127.0.0.1",
@@ -10,21 +12,29 @@ mydb = mysql.connector.connect(
   database="the_show"
 )
 
-response = requests.get("https://statsapi.mlb.com/api/v1/teams?&hydrate=nextSchedule(team,gameType=[S,R,F,D,L,W,C],inclusive=false,limit=1)")
+response = requests.get("https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=2025&standingsTypes=regularSeason")
+
+# To get all 2025 season games
+# params = {
+#         "sportId": 1,     # 1 is the ID for MLB
+#         "season": 2025    # The season year
+#     }
+# # response = requests.get("https://statsapi.mlb.com/api/v1/schedule", params)
 
 data = response.json()  # Convert JSON response to a Python dictionary
+
+# with open("data.json", "w") as file:
+#     json.dump(data, file, indent=4)
+#     sys.exit(0)
+
 
 teamsData = []
 teamsDict = {}
 
-
-for team in data['teams']:
-  if("name" in team['league']  and (team['league']['name'] == "National League" or team['league']['name'] == "American League")):
-
-    teamsDict[team["nextGameSchedule"]["dates"][0]['games'][0]['teams']['away']['team']['name']] = team["nextGameSchedule"]["dates"][0]['games'][0]['teams']['away']['leagueRecord']
-    teamsDict[team["nextGameSchedule"]["dates"][0]['games'][0]['teams']['home']['team']['name']] = team["nextGameSchedule"]["dates"][0]['games'][0]['teams']['home']['leagueRecord']
-
-# print(teamsDict)
+for division in data['records']:
+  for team in division['teamRecords']:
+    print("Team: ", team, end="\n\n")
+    teamsDict[team['team']['name']] = team["leagueRecord"]
 
 myCursor = mydb.cursor()
 
