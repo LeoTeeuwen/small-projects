@@ -35,17 +35,10 @@ gamesTotal = 0
 for date in data['dates']:
     for game in date['games']:
         gamesTotal += 1
-        # print(game, end="\n")
-        # print(game['teams']['away'], end="\n")
-        # print(game['teams']['home'], end="\n\n")
-
         if game['teams']['away']['team']['name'] not in matchUpsDict:
             matchUpsDict[game['teams']['away']['team']['name']] = {}
         if game['teams']['home']['team']['name'] not in  matchUpsDict:
             matchUpsDict[game['teams']['home']['team']['name']] = {}
-
-        # print(game['teams']['away'].keys(), end="\n")
-        # print(game, end="\n\n")
 
         if 'isWinner' not in game['teams']['away']:
             print("no winner somehow??")
@@ -76,6 +69,9 @@ for date in data['dates']:
 print(matchUpsDict)
 print(noWinnerCount)
 print(gamesTotal)
+
+with open("final.json", "w") as file:
+    json.dump(matchUpsDict, file, indent=4)
 
 sys.exit(0)
 
