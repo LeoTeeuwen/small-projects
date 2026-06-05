@@ -19,16 +19,15 @@ response = requests.get("https://statsapi.mlb.com/api/v1/standings?leagueId=103,
 #         "sportId": 1,     # 1 is the ID for MLB
 #         "season": 2025    # The season year
 #     }
-# # response = requests.get("https://statsapi.mlb.com/api/v1/schedule", params)
+# response = requests.get("https://statsapi.mlb.com/api/v1/schedule", params)
 
 data = response.json()  # Convert JSON response to a Python dictionary
 
-# with open("data.json", "w") as file:
-#     json.dump(data, file, indent=4)
-#     sys.exit(0)
+with open("data2.json", "w") as file:
+    json.dump(data, file, indent=4)
+    sys.exit(0)
 
 
-teamsData = []
 teamsDict = {}
 
 for division in data['records']:
