@@ -21,18 +21,12 @@ response = requests.get("https://statsapi.mlb.com/api/v1/schedule", params)
 
 data = response.json()  # Convert JSON response to a Python dictionary
 
-# with open("data2.json", "w") as file:
-#     json.dump(data, file, indent=4)
-
-
 myCursor = mydb.cursor(buffered=True)
 
 myCursor.execute("SHOW TABLES")
 
 # There is likely a more elegant way of doing this, but I do not want to wrap everything in a for loop so this is to escape that
 tableExists = False
-
-# myCursor.execute("DROP TABLE games")
 
 for x in myCursor:
   if x[0] == 'games':
@@ -46,8 +40,6 @@ myCursor.execute("CREATE TABLE games (id VARCHAR(255), away VARCHAR(255), home V
 
 for date in data['dates']:
     for game in date['games']:
-        print(game)
-        # print(game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], game['teams']['away']['team']['name'], game['season'], game['seriesDescription'], end="\n\n")
 
         # To check if the game has a winner (normal game that ended)
         if game['status']['statusCode'] == "F":
