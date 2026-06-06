@@ -25,35 +25,50 @@ data = response.json()  # Convert JSON response to a Python dictionary
 #     json.dump(data, file, indent=4)
 
 
-myCursor = mydb.cursor()
+myCursor = mydb.cursor(buffered=True)
 
 myCursor.execute("SHOW TABLES")
 
 # There is likely a more elegant way of doing this, but I do not want to wrap everything in a for loop so this is to escape that
 tableExists = False
 
+# myCursor.execute("DROP TABLE games")
+
 for x in myCursor:
   if x[0] == 'games':
     tableExists = True
 
-if not tableExists:
-  myCursor.execute("CREATE TABLE games (id VARCHAR(255) PRIMARY KEY, away VARCHAR(255), home VARCHAR(255), awayScore INT, homeScore INT, winner VARCHAR(255), season VARCHAR(255), gameType VARCHAR(255))")
+if tableExists:
+  myCursor.execute("DROP TABLE games")
+
+myCursor.execute("CREATE TABLE games (id VARCHAR(255), away VARCHAR(255), home VARCHAR(255), awayScore INT, homeScore INT, winner VARCHAR(255), season VARCHAR(255), gameType VARCHAR(255), closedAndReason VARCHAR(255))")
+
 
 for date in data['dates']:
     for game in date['games']:
-        print(game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], game['teams']['away']['team']['name'], game['season'], game['seriesDescription'], end="\n\n")
+        print(game)
+        # print(game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], game['teams']['away']['team']['name'], game['season'], game['seriesDescription'], end="\n\n")
 
-        if game['teams']['away']['isWinner'] == True:
-            myCursor.execute(f"INSERT INTO games (id, away, home, awayScore, homeScore, winner, season, gameType) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", 
-                            (game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], game['teams']['away']['team']['name'], game['season'], game['seriesDescription']))
-        elif game['teams']['home']['isWinner'] == True:
-            myCursor.execute(f"INSERT INTO games (id, away, home, awayScore, homeScore, winner, season, gameType) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", 
-                            (game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], game['teams']['home']['team']['name'], game['season'], game['seriesDescription']))
-        else:
-            myCursor.execute(f"INSERT INTO games (id, away, home, awayScore, homeScore, winner, season, gameType) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", 
-                            (game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], "tie", game['season'], game['seriesDescription']))
+        # To check if the game has a winner (normal game that ended)
+        if game['status']['statusCode'] == "F":
+            if game['teams']['away']['isWinner'] == True:
+                myCursor.execute(f"INSERT INTO games (id, away, home, awayScore, homeScore, winner, season, gameType, closedAndReason) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                                (game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], game['teams']['away']['team']['name'], game['season'], game['seriesDescription'], "null"))
+            elif game['teams']['home']['isWinner'] == True:
+                myCursor.execute(f"INSERT INTO games (id, away, home, awayScore, homeScore, winner, season, gameType, closedAndReason) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                                (game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], game['teams']['home']['team']['name'], game['season'], game['seriesDescription'], "null"))
+        # Tie edge case
+        elif game['status']['statusCode'] == "FT":
+            myCursor.execute(f"INSERT INTO games (id, away, home, awayScore, homeScore, winner, season, gameType, closedAndReason) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                            (game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], game['teams']['away']['score'], game['teams']['home']['score'], "tie", game['season'], game['seriesDescription'], "null"))
+        # Inclement Weather
+        elif game['status']['statusCode'] == "CI":
+            myCursor.execute(f"INSERT INTO games (id, away, home, awayScore, homeScore, winner, season, gameType, closedAndReason) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                            (game['gameGuid'], game['teams']['away']['team']['name'], game['teams']['home']['team']['name'], -1, -1, "null", game['season'], game['seriesDescription'], "Inclement Weather"))
         
-# Remember, you need to commit!!
-mydb.commit()
+        # Remember, you need to commit!!
+        mydb.commit()
+    
+        
 
 mydb.close()
