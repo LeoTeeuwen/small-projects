@@ -2,8 +2,6 @@
 
 import mysql.connector
 import requests
-import json
-import sys
 
 mydb = mysql.connector.connect(
   host="127.0.0.1",
