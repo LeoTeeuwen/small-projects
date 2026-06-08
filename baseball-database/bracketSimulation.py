@@ -2,6 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import random
 from itertools import pairwise
+from pandasCompCalculation import simulateWinner
 
 
 db_connection_str = 'mysql+pymysql://root:password@127.0.0.1/the_show'
