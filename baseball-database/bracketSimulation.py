@@ -1,7 +1,7 @@
 import pandas as pd
 from sqlalchemy import create_engine
 import random
-from itertools import pairwise
+from itertools import batched
 from pandasCompCalculation import simulateWinner
 
 
@@ -10,7 +10,7 @@ db_connection = create_engine(db_connection_str)
 
 df = pd.read_sql('SELECT DISTINCT away FROM games', con=db_connection)
 
-print(df)
+print(df, end="\n\n")
 
 mlb_teams = [
     "Arizona Diamondbacks",
@@ -47,7 +47,42 @@ mlb_teams = [
 
 random.shuffle(mlb_teams)
 
-print(mlb_teams)
 
-for team1, team2 in pairwise(mlb_teams):
-    print(f"{team1} vs {team2}")
+def simulateBracketRound(teams: str):
+    # Prepare for odd case
+    free_win_team = None
+    if len(teams) % 2 == 1:
+        free_win_team = teams.pop(-1)
+
+
+    bracket_winners = []
+    # First Bracket Simulation
+    for team1, team2 in batched(teams, 2):
+        bracket_winners.append(simulateWinner(team1, team2, db_connection))
+    
+    # Append free winning team if it exists
+    if free_win_team is not None:
+        bracket_winners.append(free_win_team)
+    
+    return bracket_winners
+
+print("Teams in first bracket")
+print(len(mlb_teams))
+
+first_bracket_winners = simulateBracketRound(mlb_teams)
+
+print(len(first_bracket_winners))
+
+second_bracket_winners = simulateBracketRound(first_bracket_winners)
+print(len(second_bracket_winners))
+
+third_bracket_winners = simulateBracketRound(second_bracket_winners)
+print(len(third_bracket_winners))
+
+semi_finals_winner = simulateBracketRound(third_bracket_winners)
+print(len(semi_finals_winner))
+
+finals_winner = simulateBracketRound(semi_finals_winner)
+print(len(finals_winner))
+
+print(f"Winner!: {finals_winner[0]}")
